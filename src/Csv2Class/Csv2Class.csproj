@@ -2,10 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1;net5.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>csv2class</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
+    <Authors>danielcr</Authors>
+    <Description>Tool for scaffolding csv files into C# classes</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/SheepRock/Csv2Class</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SheepRock/Csv2Class</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>c# csharp csv class scaffold</PackageTags>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
