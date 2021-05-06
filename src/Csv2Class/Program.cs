@@ -131,7 +131,13 @@ namespace Csv2Class
                 .Select(x => x[i].Trim('\"'));
 
             //Try to guess the data type
-            if (nonEmptyRecords.All(x => int.TryParse(x, out _)))
+
+            //If the entire column is blank, then we can't guess the data type, so we use string
+            if (!nonEmptyRecords.Any())
+            {
+                column.PropertyType = "string";
+            }
+            else if (nonEmptyRecords.All(x => int.TryParse(x, out _)))
             {
                 column.PropertyType = nulable ? "int?" : "int";
             }
