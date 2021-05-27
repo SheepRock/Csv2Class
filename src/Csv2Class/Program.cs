@@ -111,7 +111,19 @@ namespace Csv2Class
             for(int i = 0; i < headers.Length; i++)
             {
                 columns.Add(ProcessColumn(culture, headers, records, i));
+
+                // Check if already exists a property with that name, and add an index if exists
+                // This could not have been done based in the column header because with the sanitation of the header
+                // we may have a case where multiple columns with different headers end up with the same property name
+                // or adding an index could cause a conflict with another property.
+                int index = 2;
+                string propertyName = columns[i].PropertyName; //stores the base name
+                while (columns.Take(i).Any(x => x.PropertyName == columns[i].PropertyName))
+                {
+                    columns[i].PropertyName = $"{propertyName}_{index++}";
+                }
             }
+            
             CreateClass(o, columns);
         }
 
@@ -124,6 +136,13 @@ namespace Csv2Class
             column.DisplayName = headers[i];
             //Sanitize the column name, so it becomes the Property name
             column.PropertyName = Sanitizer.SanitizeIdentifier(headers[i]);
+
+            //Check if there are duplicate column names and apply the NameIndex
+            if (headers.Where(x => x == headers[i]).Count() > 1)
+            {
+                column.NameIndex = headers[..i].Where(x => x == headers[i]).Count();
+            }
+
             //If any record is empty, the datatype is nullable
             bool nulable = records.Any(x => string.IsNullOrWhiteSpace(x[i].Trim('\"')));
             var nonEmptyRecords = records
@@ -207,6 +226,11 @@ namespace Csv2Class
                         if (o.GenerateColumnName)
                         {
                             sw.WriteLine($"        [Name(\"{column.DisplayName}\")]");
+                            //If there is more than one column with the same name, add the NameIndex Attribute
+                            if (column.NameIndex.HasValue)
+                            {
+                                sw.WriteLine($"        [NameIndex({column.NameIndex.Value})]");
+                            }
                         }
                     }
                     //Property
@@ -245,6 +269,11 @@ namespace Csv2Class
                         if (o.GenerateColumnName)
                         {
                             sw.Write($".Name(\"{column.DisplayName}\")");
+                            //If there is more than one column with the same name, add the NameIndex
+                            if (column.NameIndex.HasValue)
+                            {
+                                sw.Write($".NameIndex({column.NameIndex.Value})");
+                            }
                         }
                         sw.WriteLine($";");
                     }

@@ -10,5 +10,6 @@ namespace Csv2Class
         public int Index { get; set; }
         public string PropertyName { get; set; }
         public string PropertyType { get; set; }
+        public int? NameIndex { get; set; }
     }
 }
