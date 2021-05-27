@@ -3,7 +3,7 @@ Small tool to scaffold a CSV file into a C# class, with options to add the Displ
 
 # Instalation 
 ```shell
-dotnet tool install --global Csv2Class --version 1.0.0
+dotnet tool install --global Csv2Class --version 1.1.0
 ```
 # Usage
 
