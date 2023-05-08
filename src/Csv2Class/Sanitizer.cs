@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Csv2Class
 {
-    class Sanitizer
+    partial class Sanitizer
     {
         public static string SanitizeIdentifier(string input)
         {
@@ -21,7 +21,7 @@ namespace Csv2Class
 
             //Identifiers may contain Unicode letter characters, decimal digit characters, 
             //Unicode connecting characters, Unicode combining characters, or Unicode formatting characters.
-            input = Regex.Replace(input, @"[^\p{L}\p{Nd}\p{Pc}\p{Cf}]", "");
+            input = UnallowedUnicode().Replace(input, "");
 
             //Identifiers must start with a letter, or _
             if (!char.IsLetter(input[0]) && input[0] != '_')
@@ -31,7 +31,7 @@ namespace Csv2Class
 
             // Identifiers should not contain two consecutive _ characters. 
             //Those names are reserved for compiler generated identifiers.
-            input = Regex.Replace(input, @"_{2,}", "_");
+            input = DoubleUnderscore().Replace(input, "_");
 
             return input;
         }
@@ -40,10 +40,17 @@ namespace Csv2Class
         {
             // "_" and "-" are valid identifiers, but we remove them to make the name more like the convention
             //of C# class and property names
-            return Regex.Replace(input, @"(?<=(\b|\d|_))\p{Ll}", x => x.Value.ToUpper())
+            return FirstWordLowercaseLetter().Replace(input, x => x.Value.ToUpper())
                 .Replace(" ", "")
                 .Replace("-", "")
                 .Replace("_",""); 
         }
+
+        [GeneratedRegex("[^\\p{L}\\p{Nd}\\p{Pc}\\p{Cf}]")]
+        private static partial Regex UnallowedUnicode();
+        [GeneratedRegex("_{2,}")]
+        private static partial Regex DoubleUnderscore();
+        [GeneratedRegex("(?<=(\\b|\\d|_))\\p{Ll}")]
+        private static partial Regex FirstWordLowercaseLetter();
     }
 }

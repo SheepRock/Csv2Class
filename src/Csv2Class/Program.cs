@@ -51,17 +51,11 @@ namespace Csv2Class
             };
 
             //Get the output directory
-            if (o.OutputDir == null)
-            {
-                o.OutputDir = Directory.GetCurrentDirectory();
-            }
+            o.OutputDir ??= Directory.GetCurrentDirectory();
             o.OutputDir = Path.GetFullPath(o.OutputDir);
             
             //Ensure we have a valid class name
-            if (o.ClassName == null)
-            {
-                o.ClassName = Sanitizer.SanitizeIdentifier(Path.GetFileNameWithoutExtension(o.CsvFile));
-            }
+            o.ClassName ??= Sanitizer.SanitizeIdentifier(Path.GetFileNameWithoutExtension(o.CsvFile));
 
             return true;
         }
@@ -70,7 +64,7 @@ namespace Csv2Class
         {
             //initialize the culture we will use
             var culture = o.CultureCode == null ? CultureInfo.InvariantCulture : new CultureInfo(o.CultureCode,false);
-            CsvConfiguration config = new CsvConfiguration(culture)
+            CsvConfiguration config = new(culture)
             {
                 Delimiter = o.Separator,                
                 HasHeaderRecord = false,
@@ -79,10 +73,10 @@ namespace Csv2Class
             //Where the headers will be stored
             string[] headers = null;
             //All records will be stored here for easy Linq processing
-            List<string[]> records = new List<string[]>(); 
+            List<string[]> records = new(); 
             //Definition of the csv file struct
-            List<ColumnDefinition> columns = new List<ColumnDefinition>();
-            using (CsvReader csv = new CsvReader(new StreamReader(o.CsvFile), config))
+            List<ColumnDefinition> columns = new();
+            using (CsvReader csv = new(new StreamReader(o.CsvFile), config))
             {
                 //Check if the first row is the header
                 if (o.HasHeader)
@@ -130,12 +124,14 @@ namespace Csv2Class
 
         private static ColumnDefinition ProcessColumn(CultureInfo culture, string[] headers, List<string[]> records, int i)
         {
-            ColumnDefinition column = new ColumnDefinition();
-            column.Index = i;
-            //The display name will be the header of the column
-            column.DisplayName = headers[i];
-            //Sanitize the column name, so it becomes the Property name
-            column.PropertyName = Sanitizer.SanitizeIdentifier(headers[i]);
+            ColumnDefinition column = new()
+            {
+                Index = i,
+                //The display name will be the header of the column
+                DisplayName = headers[i],
+                //Sanitize the column name, so it becomes the Property name
+                PropertyName = Sanitizer.SanitizeIdentifier(headers[i])
+            };
 
             //Check if there are duplicate column names and apply the NameIndex
             if (headers.Where(x => x == headers[i]).Count() > 1)
@@ -191,7 +187,7 @@ namespace Csv2Class
         {
             Directory.CreateDirectory(o.OutputDir);
             var classFile = Path.Combine(o.OutputDir, $"{o.ClassName}.cs");
-            using (StreamWriter sw = new StreamWriter(classFile))
+            using (StreamWriter sw = new(classFile))
             {
                 //Using directives
                 sw.WriteLine("using System;");
@@ -244,43 +240,41 @@ namespace Csv2Class
             if(o.UseClassMaps && (o.GenerateIndex || o.GenerateColumnName))
             {
                 var mapFile = Path.Combine(o.OutputDir, $"{o.ClassName}Map.cs");
-                using (StreamWriter sw = new StreamWriter(mapFile))
+                using StreamWriter sw = new(mapFile);
+                //Using directives
+                sw.WriteLine("using System;");
+                sw.WriteLine("using CsvHelper.Configuration;");
+                //Namespace
+                sw.WriteLine($@"namespace {o.Namespace}");
+                sw.WriteLine("{");
+                //class
+                sw.WriteLine($@"    class {o.ClassName}Map : ClassMap<{o.ClassName}>");
+                sw.WriteLine("    {");
+                //Constructor
+                sw.WriteLine($"        public {o.ClassName}Map()");
+                sw.WriteLine("        {");
+                //Maps
+                foreach (var column in columns.OrderBy(x => x.Index))
                 {
-                    //Using directives
-                    sw.WriteLine("using System;");
-                    sw.WriteLine("using CsvHelper.Configuration;");
-                    //Namespace
-                    sw.WriteLine($@"namespace {o.Namespace}");
-                    sw.WriteLine("{");
-                    //class
-                    sw.WriteLine($@"    class {o.ClassName}Map : ClassMap<{o.ClassName}>");
-                    sw.WriteLine("    {");
-                    //Constructor
-                    sw.WriteLine($"        public {o.ClassName}Map()");
-                    sw.WriteLine("        {");
-                    //Maps
-                    foreach (var column in columns.OrderBy(x => x.Index))
+                    sw.Write($"            Map(m => m.{column.PropertyName})");
+                    if (o.GenerateIndex)
                     {
-                        sw.Write($"            Map(m => m.{column.PropertyName})");
-                        if (o.GenerateIndex)
-                        {
-                            sw.Write($".Index({column.Index})");
-                        }
-                        if (o.GenerateColumnName)
-                        {
-                            sw.Write($".Name(\"{column.DisplayName}\")");
-                            //If there is more than one column with the same name, add the NameIndex
-                            if (column.NameIndex.HasValue)
-                            {
-                                sw.Write($".NameIndex({column.NameIndex.Value})");
-                            }
-                        }
-                        sw.WriteLine($";");
+                        sw.Write($".Index({column.Index})");
                     }
-                    sw.WriteLine("        }");
-                    sw.WriteLine("    }");
-                    sw.WriteLine("}");
+                    if (o.GenerateColumnName)
+                    {
+                        sw.Write($".Name(\"{column.DisplayName}\")");
+                        //If there is more than one column with the same name, add the NameIndex
+                        if (column.NameIndex.HasValue)
+                        {
+                            sw.Write($".NameIndex({column.NameIndex.Value})");
+                        }
+                    }
+                    sw.WriteLine($";");
                 }
+                sw.WriteLine("        }");
+                sw.WriteLine("    }");
+                sw.WriteLine("}");
             }
         }
     }
