@@ -3,10 +3,13 @@ Small tool to scaffold a CSV file into a C# class, with options to add the Displ
 
 # Instalation 
 ```shell
-dotnet tool install --global Csv2Class --version 1.2.0
+dotnet tool install --global Csv2Class --version 1.2.1
 ```
 
 # Release notes
+
+## 1.2.1
+ * Bump to .NET 7
 
 ## 1.2.0
  * If multiple columns have the same header, adds the NameIndex attribute to differentiate
