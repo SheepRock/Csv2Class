@@ -3,10 +3,15 @@ Small tool to scaffold a CSV file into a C# class, with options to add the Displ
 
 # Instalation 
 ```shell
-dotnet tool install --global Csv2Class --version 1.2.1
+dotnet tool install --global Csv2Class --version 1.2.2
 ```
 
 # Release notes
+
+## 1.2.2
+ * Adds option to allow the new DateOnly and TimeOnly types when guessing the column type
+ * Fixes the spelling of the options "index-attribute" and "name-attribute"
+ * Update the version of CsvHelper to 32
 
 ## 1.2.1
  * Bump to .NET 7
@@ -81,6 +86,11 @@ csv2class -i myCsvFilePath.csv -n -m
 csv2class -i myCsvFilePath.csv -xnm
 ```
 
+By default, DateOnly and TimeOnly types are not used. Use the `-e` switch or `--datetimeonly` to enable its usage
+```bat
+csv2class -i myCsvFilePath.csv -e
+```
+
 
 ## All options
 ```
@@ -102,11 +112,13 @@ csv2class -i myCsvFilePath.csv -xnm
 
   -d, --display-attribute    Generate ASP.NET "Display" attribute
 
-  -x, --index-atrribute      Generate CsvHelper "Index" attribute
+  -x, --index-attribute      Generate CsvHelper "Index" attribute
 
-  -n, --name-atrribute       Generate CsvHelper "Name" attribute
+  -n, --name-attribute       Generate CsvHelper "Name" attribute
 
   -m, --map                  Use CsvHelper class map instead of attributes
+
+  -e --datetimeonly          Allow using the new DateOnly and TimeOnly types when guessing the column type
 
   --help                     Display this help screen.
   ```

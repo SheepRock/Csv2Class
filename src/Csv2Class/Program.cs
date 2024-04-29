@@ -104,7 +104,7 @@ namespace Csv2Class
             //Create the columns
             for(int i = 0; i < headers.Length; i++)
             {
-                columns.Add(ProcessColumn(culture, headers, records, i));
+                columns.Add(ProcessColumn(culture, headers, records, i, o.UseDateTimeOnly));
 
                 // Check if already exists a property with that name, and add an index if exists
                 // This could not have been done based in the column header because with the sanitation of the header
@@ -122,7 +122,7 @@ namespace Csv2Class
         }
 
 
-        private static ColumnDefinition ProcessColumn(CultureInfo culture, string[] headers, List<string[]> records, int i)
+        private static ColumnDefinition ProcessColumn(CultureInfo culture, string[] headers, List<string[]> records, int i, bool useDateTimeOnly)
         {
             ColumnDefinition column = new()
             {
@@ -163,6 +163,14 @@ namespace Csv2Class
             else if (nonEmptyRecords.All(x => double.TryParse(x, NumberStyles.Float, culture, out _)))
             {
                 column.PropertyType = nulable ? "double?" : "double";
+            }
+            else if (useDateTimeOnly && nonEmptyRecords.All(x => DateOnly.TryParse(x,culture,out _)))
+            {
+                column.PropertyType = nulable ? "DateOnly?" : "DateOnly";
+            }
+            else if (useDateTimeOnly && nonEmptyRecords.All(x => TimeOnly.TryParse(x, culture, out _)))
+            {
+                column.PropertyType = nulable ? "TimeOnly?" : "TimeOnly";
             }
             else if (nonEmptyRecords.All(x => DateTime.TryParse(x, culture, DateTimeStyles.None, out _)))
             {

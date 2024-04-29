@@ -25,11 +25,14 @@ namespace Csv2Class
         
         [Option('d', "display-attribute", Required = false, HelpText = "Generate ASP.NET \"Display\" attribute")]
         public bool GenerateDisplay { get; set; }
-        [Option('x', "index-atrribute", Required = false, HelpText = "Generate CsvHelper \"Index\" attribute")]
+        [Option('x', "index-attribute", Required = false, HelpText = "Generate CsvHelper \"Index\" attribute")]
         public bool GenerateIndex { get; set; }
-        [Option('n', "name-atrribute", Required = false, HelpText = "Generate CsvHelper \"Name\" attribute")]
+        [Option('n', "name-attribute", Required = false, HelpText = "Generate CsvHelper \"Name\" attribute")]
         public bool GenerateColumnName { get; set; }
         [Option('m', "map", Required = false, HelpText = "Use CsvHelper class map instead of attributes")]
         public bool UseClassMaps { get; set; }
+        [Option('e', "datetimeonly", Required = false, HelpText = "Allow using the new DateOnly and TimeOnly types when guessing the column type")]
+        public bool UseDateTimeOnly { get; set; }
+
     }
 }
